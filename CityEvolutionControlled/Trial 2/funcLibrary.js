@@ -75,6 +75,15 @@ function HSLtoHex(h, s, l){
    return "#" + componentToHex(Math.round(r * 255)) + componentToHex(Math.round(g * 255)) + componentToHex(Math.round(b * 255));
 }
 
+function hexToRgb(hex) {
+			var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+			return result ? {
+				r: parseInt(result[1], 16),
+				g: parseInt(result[2], 16),
+				b: parseInt(result[3], 16)
+			} : null;
+		}
+
 function mod(vec){//gives the modulus of a vector
 	var r = Math.sqrt((vec[0]*vec[0])+(vec[1]*vec[1]));
 	return r;
@@ -170,7 +179,7 @@ function arr2dContains(ar, val){//checks if the array ar contains the element va
 	return contains;
 }
 
-function roundOff(vect,rndOff){//rounds off the vector to rndOff decimal digits
+function roundOff(vect,rndOff){
 	var vec = vect;
 	vec[0] = Math.round(vec[0]*Math.pow(10,rndOff))/Math.pow(10,rndOff);
 	vec[1] = Math.round(vec[1]*Math.pow(10,rndOff))/Math.pow(10,rndOff);
@@ -178,7 +187,7 @@ function roundOff(vect,rndOff){//rounds off the vector to rndOff decimal digits
 	return vec;
 };
 
-function roundNum(num,dec){//rounds off num to dec decimals
+function roundNum(num,dec){//rounds off number num to dec decimals
 	var newNum = Math.round(num*Math.pow(10,dec))/Math.pow(10,dec);
 	return newNum;
 }
