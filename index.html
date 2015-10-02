@@ -70,7 +70,7 @@
 		</div>
 		<br />
 		<div id="simulateBtnTool" class="tool">
-			<p id="textTip">Select a city to simulate.</p>
+			<p id="textTip">Please Wait...Loading</p>
 		</div>
 	</div>
 	
@@ -83,6 +83,7 @@
 	window.onload = function(){
 		$('#toolContainer').css('left',($('.canvas').width()+20)+'px');
 		loadCity();//loading the city as soon as the page is loaded
+		$('#textTip').text('Select a City to Simulate');
 	}
 	$(window).resize(function(){
 		$('#toolContainer').css('left',($('.canvas').width()+20)+'px');
