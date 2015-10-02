@@ -4,11 +4,11 @@ var bc = baseCanvas.getContext('2d');
 bc.fillStyle = 'rgb(255,0,0)';
 bc.strokeStyle = 'green';
 
-var travelCanvas = document.getElementById('travelCanvas');
-var tc = travelCanvas.getContext('2d');
-tc.fillStyle = 'rgba(0,0,0,0.4)';
-tc.strokeStyle = 'rgba(0,0,0,1)';
-tc.lineWidth = 0.7;
+var mapCanvas = document.getElementById('mapCanvas');
+var mc = mapCanvas.getContext('2d');
+mc.fillStyle = 'rgba(0,0,0,0.4)';
+mc.strokeStyle = 'rgba(0,0,0,1)';
+mc.lineWidth = 0.7;
 
 var finalCanvas = document.getElementById('finalCanvas');
 var fc = finalCanvas.getContext('2d');
@@ -16,7 +16,11 @@ fc.fillStyle = 'rgba(40,40,40,0.5)';
 fc.strokeStyle = 'black';
 fc.lineWidth = 3;
 
-var hubFactor = 0.3;//relative importance of hubs when making roads
+var curCity = 'hyderabad';//current city
+var line = new Array();//all the lines
+var sq0 = [500,500,1000,true];
+var sqStack = [sq0];//sq to start with
+var curMap = new Image(baseCanvas.width,baseCanvas.height);//map of the current city
 
 function intrcpt(e1,e2,sq){
 	var vt = [];
@@ -78,51 +82,6 @@ function intSum(sq){//returns the sum of all Intercepts
 	return iSum;
 }
 
-function uSum(sqn,pos){
-	var hubSum = [0,0];//contribution from other commercial hubs
-	
-	for(s in sqStack){
-		if(sqStack[s][3]){continue;}
-		if(s == sqn){continue;}
-		var sqPos = [sqStack[s][0], sqStack[s][1]];
-		hubSum = vSum(hubSum,unitV(vDiff(sqPos,pos)));
-	}
-	hubSum = unitV(hubSum);
-	return hubSum;
-}
-
-function roadPt(sqn){//calculates the critical point and moves the drawing head to that point
-	var stp=5;//this is the length of each step
-	//console.log(sqStack[sqn]);
-	var pos = [sqStack[sqn][0],sqStack[sqn][1]];
-	var lSum =  minDistPt(pos);//contribution from lines i.e. roads
-	if(mod(lSum[0]) == 0){
-		return pos;
-	}else{
-		switch(lSum[2]){
-			case 1:{
-				var hubSum = vPrd(uSum(sqn,pos),mod(lSum[0])*hubFactor);
-				lUnit = unitV(vDiff(line[lSum[1]][0],line[lSum[1]][1]));
-				return vSum(pos,vSum(lSum[0],vPrd(lUnit,dot(hubSum,lUnit))));
-				break;
-			}
-			case 2 :
-			case 3 : {
-				return vSum(pos,lSum[0]);
-			}
-		}
-	}
-}
-
-function makeRoads(){
-	for(s in sqStack){
-		if(sqStack[s][3]){continue;}
-		var initPt = [sqStack[s][0],sqStack[s][1]];
-		var finPt = roadPt(s);
-		line.push([initPt,finPt,'road']);
-	}
-}
-
 function Intersects(e1,e2,p1,p2){//this is tailored for this program only. - returns whether those line intersect or not
 	var sameSide1 = false;
 	var sameSide2 = false;
@@ -160,6 +119,41 @@ function intPt(e1,e2,p1,p2){//gives the point of intersection of the line Segmen
 	}
 }
 
+function transSq(sq,trN){//sq contains [center-x, center-y, square size, isResidence]
+	var cen = [sq[0],sq[1]];
+	var E1 = [sq[0] - 0.5*sq[2], sq[1] - 0.5*sq[2]];
+	var E2 = [sq[0] + 0.5*sq[2], sq[1] - 0.5*sq[2]];
+	var E3 = [sq[0] + 0.5*sq[2], sq[1] + 0.5*sq[2]];
+	var E4 = [sq[0] - 0.5*sq[2], sq[1] + 0.5*sq[2]];
+	var E12 = vPrd(vSum(E1,E2),0.5);//midPoint of E1 and E2
+	var E23 = vPrd(vSum(E2,E3),0.5);//midPoint of E2 and E3
+	var E34 = vPrd(vSum(E3,E4),0.5);//midPoint of E3 and E4
+	var E41 = vPrd(vSum(E4,E1),0.5);//midPoint of E4 and E1
+	
+	var sqN = sq[2]/3;//size of the new squares
+	var f1 = sqN*Math.sqrt(2);
+	var f2 = sqN;
+	
+	var c = [];
+	c[0] = vSum(vPrd(unitV(vDiff(E1,cen)),sqN*Math.sqrt(2)),cen);
+	c[1] = vSum(vPrd(unitV(vDiff(E12,cen)),sqN),cen);
+	c[2] = vSum(vPrd(unitV(vDiff(E2,cen)),sqN*Math.sqrt(2)),cen);
+	c[3] = vSum(vPrd(unitV(vDiff(E41,cen)),sqN),cen);
+	c[4] = cen;
+	c[5] = vSum(vPrd(unitV(vDiff(E23,cen)),sqN),cen);
+	c[6] = vSum(vPrd(unitV(vDiff(E4,cen)),sqN*Math.sqrt(2)),cen);
+	c[7] = vSum(vPrd(unitV(vDiff(E34,cen)),sqN),cen);
+	c[8] = vSum(vPrd(unitV(vDiff(E3,cen)),sqN*Math.sqrt(2)),cen);
+	
+	for(var n = 0; n < 9; n++){
+		var isResi = sq[3];
+		if(n == trN){
+			var isResi = !sq[3];
+		}
+		sqStack.push([c[n][0], c[n][1], sqN, isResi]);
+	}
+}
+
 function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 	var cen = [sq[0],sq[1]];
 	var E1 = [sq[0] - 0.5*sq[2], sq[1] - 0.5*sq[2]];
@@ -187,7 +181,7 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 	c[8] = vSum(vPrd(unitV(vDiff(E3,cen)),sqN*Math.sqrt(2)),cen);
 	
 	var theNum;
-	if(sq[3]){
+	if(sq[3]){//checking if it is a residential region
 		var minParam = 0;//intercept Sum
 		var minParam2 = 2*baseCanvas.width;//just an impossible large value to start with
 		for(var cn = 0; cn < 9; cn++){
@@ -195,15 +189,17 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 			var param2 = minDist(c[cn]);
 			if(minParam < param1){
 				minParam = param1;
+				minParam2 = param2;
 				theNum = cn;
 			}else if(minParam == param1){
 				if(param2 < minParam2){
-					theNum = cn;
 					minParam2 = param2;
+					minParam = param1;
+					theNum = cn;
 				}
 			}
 		}
-	}else{
+	}else{//if it is a commercial region
 		var minParam = 0;//intercept Sum
 		var maxParam = 0;//just an impossible large value to start with
 		for(var cn = 0; cn < 9; cn++){//console.log(maxDist(c[cn]));
@@ -211,10 +207,12 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 			var param2 = minDist(c[cn]);
 			if(param1 > minParam){
 				minParam = param1;
+				minParam2 = param2;
 				theNum = cn;
 			}else if(param1 == minParam){
 				if(maxParam < param2){
 					maxParam = param2;
+					minParam = param1;
 					theNum = cn;
 				}
 			}
@@ -281,7 +279,7 @@ function minDist(pos){
 	return minD;
 }
 
-function minDistPt(pos){
+function minDistPt(pos){//returns the minimum Distance detals between a finite line segment and a point
 	var minD = 2*baseCanvas.width;
 	var lDist = [];
 	var ln;
@@ -319,6 +317,7 @@ function maxDist(pos){
 
 function renderCanvas(){
 	bc.clearRect(0,0,1000,1000);
+	fc.clearRect(0,0,1000,1000);
 	
 	for(var s = 0; s < sqStack.length; s++){//console.log(sqStack[s]);
 		if(sqStack[s][3]){
@@ -333,54 +332,107 @@ function renderCanvas(){
 	}
 	
 	for(l = 0; l < line.length; l++){//console.log(line[l][2]);
-		fc.strokeStyle = 'black';
+		fc.strokeStyle = line[l][3];
 		fc.beginPath();
 		fc.moveTo(line[l][0][0], line[l][0][1]);
 		fc.lineTo(line[l][1][0], line[l][1][1]);
-		fc.closePath();
 		fc.stroke();
 	}
 }
 
 function flatten(){//flattens all the three layers and renders them on bc and hides the other two layers
-	tc.drawImage(baseCanvas,0,0);
-	tc.drawImage(finalCanvas,0,0);
+	bc.drawImage(finalCanvas,0,0);
 	
-	$('#baseCanvas').hide();
 	$('#finalCanvas').hide();
 }
 
-var sq0 = [500,500,1000,true];
-var sqStack = [sq0];
-
 function tesellate(){
 	var num = sqStack.length;
+	//var trN = 4;
+	//var trN = Math.floor(Math.random()*9);console.log(trN);
 	for(var s = 0; s < num; s++){
-		trans(sqStack.shift());
+		if(curCity != 'random'){
+			trans(sqStack.shift());
+		}else{
+			var trN = Math.floor(Math.random()*9);//console.log(trN);
+			transSq(sqStack.shift(),trN);
+		}
 	}
 	//console.log('done');
 }
+//tesellate();
 
-var line = [];
-//line.push([[0,100], [1000,900], 'nh9']);
-//line.push([[0,666], [1000,500], 'musi']);
-line.push([[0,500], [300,000], 'nh9']);
-line.push([[250,0], [500,1000], 'musi']);
-tesellate();
+var city = new Array();
 
-var minLn = 1000;//increase this value to 500 to see the basic transformation
+city['hyderabad'] = {lineParams:[[[0,100], [1000,900], 'nh9','black'],[[0,666], [1000,500], 'musi','cyan']],
+						mapSrc: 'hyderabadCompare.jpg'};
+city['kota'] = {lineParams:[[[0,500], [300,000], 'chambal','cyan'],[[250,0], [500,1000], 'nh12','black']],
+				mapSrc: 'kotaCompare.jpg'};
 
-var Ln = 1000;
-/*var animateLoop = setInterval(function(){
-	tesellate();
-	makeRoads();
-	renderCanvas();
-	Ln /= 3;
+function loadCity(){
+	$('#finalCanvas').show();
+	curCity = $('#citySelect').val();
+	sqStack = [sq0];
 	
-	if(Ln <= minLn){
-		clearInterval(animateLoop);
-		alert('done');
+	if(curCity != 'random'){
+		line = city[curCity].lineParams;
+		
+		curMap = document.getElementById(curCity+'Map');
+		mc.drawImage(curMap,0,0,baseCanvas.width,baseCanvas.height);
+		//console.log('drawn');
+	}else{
+		line = [];
 	}
-},10);*/
+	renderCanvas();
+}
+window.onload = loadCity;//running loadCity function as soon as the Dom elements and the page contents load
 
-renderCanvas();
+function toggleMap(userTrigger){//the parameter is true if the function was triggered by the user by clicking the checkbox
+	if(curCity != 'random'){
+		if(mapToggle.checked){
+			$('#mapCanvas').show();
+		}else{
+			$('#mapCanvas').hide();
+		}
+	}else{
+		if(mapToggle.checked){
+			if(userTrigger){alert('This is a Random Hypothetical City. Maps are available only for real cities');}
+			$('#mapToggle').prop('checked',false);
+			$('#mapCanvas').hide();
+		}else{
+			$('#mapCanvas').hide();
+		}
+	}
+}
+
+function saveImage(){
+	window.win = open(baseCanvas.toDataURL('image/png'));
+	setTimeout('win.document.execCommand("SaveAs")', 0);
+}
+
+function simulateCity(){
+	$('#textTip').text('Please Wait...');
+	var Ln = baseCanvas.width;
+	
+	bc.clearRect(0,0,baseCanvas.width,baseCanvas.height);
+	$('#finalCanvas').show();
+	sqStack = [sq0];
+	$('#mapToggle').prop('checked',false);
+	toggleMap(false);
+	renderCanvas();
+	
+	var minLn = 5;//increase this value to 500 to see the basic transformation
+	var animateLoop = setInterval(function(){
+		tesellate();
+		renderCanvas();
+		Ln /= 3;
+		
+		if(Ln <= minLn){
+			clearInterval(animateLoop);
+			flatten();
+			$('#textTip').text('Done.');
+		}
+	},100);
+
+	renderCanvas();
+}

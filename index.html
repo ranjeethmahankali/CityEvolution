@@ -1,39 +1,81 @@
 <!DOCTYPE hmtl>
 <html>
 <head>
+	<title>City Simulator</title>
 	<script type = "text/JavaScript" src = "jquery-2.1.0.min.js"></script>
 	<style type = "text/css">
+		body{
+			margin : 0px;
+			padding : 0px;
+		}
 		.canvas {
-			height : 600px;
+			height : 95%;
 			margin : 3px;
-			border : solid red 1px;
+			border : solid black 1px;
 			position : absolute;
+			top : 5px;
+			left : 5px;
 		}
 		#toolContainer {
 			position : fixed;
-			right : 5px;
-			top : 3px;
+			text-align : right;
+			right : 10%;
+			top : 20px;
+			border : solid grey 1px;
+		}
+		.tool{
+			margin : 10px;
 		}
 		#baseCanvas {
 			z-index : 0;
 		}
-		#travelCanvas {
+		#finalCanvas {
+			z-index : 50;
+		}
+		#mapCanvas {
 			z-index : 100;
+		}
+		#mapToggleTool{
+			font-style : oblique;
+		}
+		#textTip{
+			color : red;
+			font-weight : bold;
 		}
 	</style>
 </head>
 
 <body>
-	<canvas id = "baseCanvas" class = "canvas" height = "1000px" width = "1000px" usemap = "#testMap"></canvas>
-	<canvas id = "travelCanvas" class = "canvas" height = "1000px" width = "1000px"></canvas>
+	<canvas id = "baseCanvas" class = "canvas" height = "1000px" width = "1000px"></canvas>
+	<canvas id = "mapCanvas" class = "canvas" height = "1000px" width = "1000px" style="display:none"></canvas>
 	<canvas id = "finalCanvas" class = "canvas" height = "1000px" width = "1000px"></canvas>
 	
 	<div id = "toolContainer">
+		<div id="cityselectTool" class="tool">
+			Load City: <select id="citySelect" onchange="loadCity()">
+				<option value="random">Random Hypothetical City</option>
+				<option value="hyderabad">Hyderabad</option>
+				<option value="kota">Kota</option>
+			</select>
+		</div>
+		<div id="mapToggleTool" class="tool">
+			<input type="checkbox" id="mapToggle" onchange="toggleMap(true)"/>View Actual Map to Compare
+		</div>
+		<br />
+		<div id="simulateBtnTool" class="tool">
+			<button id="simulateBtn" onclick="simulateCity()">Simulate</button>
+		</div>
+		<div id="SaveImageTool" class="tool">
+			<button id="saveBtn" onclick="saveImage()">Save Results</button>
+		</div>
+		<br />
+		<div id="simulateBtnTool" class="tool">
+			<p id="textTip">Select a city to simulate.</p>
+		</div>
 	</div>
 	
-	<map name = "testMap">
-		<area shape = "rect" coords = "100,100,200,200" title = "working!"/>
-	</map>
+	<img src='hyderabadCompare.jpg' id="hyderabadMap" style="display:none"/>
+	<img src='kotaCompare.jpg' id="kotaMap" style="display:none"/>
 	
 <script type = "text/JavaScript" src = "funcLibrary.js"></script>
 <script type = "text/JavaScript" src = "cityScript.js"></script>

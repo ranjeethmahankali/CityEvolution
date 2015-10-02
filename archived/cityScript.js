@@ -92,7 +92,7 @@ function minDist(pos){//returns the distance to the closes line
 	return dist;
 }
 
-function maxDist(pos){
+function maxDist(pos){//returns the distance to the farthest line
 	var dist = 0;
 	for(l = 0; l < line.length; l++){
 		if(dist < mod(lineDist(line[l][0],line[l][1],pos))){
@@ -148,13 +148,13 @@ function tesellate(){
 }
 
 var line = [];
-line.push([[0,100], [1000,900], 'nh9']);
-line.push([[0,666], [1000,500], 'musi']);
-//line.push([[0,500], [300,000], 'nh9']);
-//line.push([[250,0], [500,1000], 'musi']);
+//line.push([[0,100], [1000,900], 'nh9']);
+//line.push([[0,666], [1000,500], 'musi']);
+line.push([[0,500], [300,000], 'nh9']);
+line.push([[250,0], [500,1000], 'musi']);
 renderCanvas();
 
-var minLn = 5;//increase this value to 500 to see the basic transformation
+var minLn = 10;//increase this value to 500 to see the basic transformation
 
 var Ln = 1000;
 var animateLoop = setInterval(function(){
