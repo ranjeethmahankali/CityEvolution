@@ -17,9 +17,9 @@
 			left : 5px;
 		}
 		#toolContainer {
-			position : fixed;
+			position : absolute;
+			width : 280px;
 			text-align : right;
-			right : 10%;
 			top : 20px;
 			border : solid grey 1px;
 		}
@@ -79,5 +79,14 @@
 	
 <script type = "text/JavaScript" src = "funcLibrary.js"></script>
 <script type = "text/JavaScript" src = "cityScript.js"></script>
+<script type = "text/JavaScript">
+	window.onload = function(){
+		$('#toolContainer').css('left',($('.canvas').width()+20)+'px');
+		loadCity();//loading the city as soon as the page is loaded
+	}
+	$(window).resize(function(){
+		$('#toolContainer').css('left',($('.canvas').width()+20)+'px');
+	});
+</script>
 </body>
 </html>

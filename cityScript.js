@@ -385,7 +385,6 @@ function loadCity(){
 	}
 	renderCanvas();
 }
-window.onload = loadCity;//running loadCity function as soon as the Dom elements and the page contents load
 
 function toggleMap(userTrigger){//the parameter is true if the function was triggered by the user by clicking the checkbox
 	if(curCity != 'random'){
