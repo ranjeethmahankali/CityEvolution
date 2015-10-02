@@ -74,7 +74,7 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 	}
 }
 
-function lineDSum(pos){
+function lineDSum(pos){//returns the sum of distances from all lines
 	var lDSum = 0;
 	for(l = 0; l < line.length; l++){
 		lDSum += mod(lineDist(line[l][0],line[l][1],pos));
@@ -82,7 +82,7 @@ function lineDSum(pos){
 	return lDSum;
 }
 
-function minDist(pos){
+function minDist(pos){//returns the distance to the closes line
 	var dist = 2*baseCanvas.width;
 	for(l = 0; l < line.length; l++){
 		if(dist > mod(lineDist(line[l][0],line[l][1],pos))){
