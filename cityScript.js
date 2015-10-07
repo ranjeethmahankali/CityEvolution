@@ -12,12 +12,13 @@ mc.lineWidth = 0.7;
 
 var finalCanvas = document.getElementById('finalCanvas');
 var fc = finalCanvas.getContext('2d');
-fc.fillStyle = 'rgba(40,40,40,0.5)';
+fc.fillStyle = 'rgba(40,40,40,0.7)';
 fc.strokeStyle = 'black';
 fc.lineWidth = 3;
 
 var curCity = 'hyderabad';//current city
 var line = new Array();//all the lines
+var zone = new Array();//all the zonesa in the city
 var sq0 = [500,500,1000,true];
 var sqStack = [sq0];//sq to start with
 var curMap = new Image(baseCanvas.width,baseCanvas.height);//map of the current city
@@ -77,7 +78,7 @@ function intrcpt(e1,e2,sq){
 function intSum(sq){//returns the sum of all Intercepts
 	var iSum = 0;
 	for(l in line){
-		iSum += intrcpt(line[l][0],line[l][1],sq);
+		iSum += intrcpt(line[l][0],line[l][1],sq)*line[l][4];
 	}
 	return iSum;
 }
@@ -263,7 +264,7 @@ function lineDSum(pos){
 
 function minDist(pos){
 	var minD = 2*baseCanvas.width;
-	for(l = 0; l < line.length; l++){
+	for(l = 0; l < line.length; l++){if(line[l][4] < 0){continue;}
 		var dist;
 		if(dot(vDiff(pos,line[l][0]),vDiff(line[l][1],line[l][0])) >= 0 && dot(vDiff(pos,line[l][1]),vDiff(line[l][0],line[l][1])) > 0){
 			dist = mod(lineDist(line[l][0],line[l][1],pos));
@@ -338,6 +339,17 @@ function renderCanvas(){
 		fc.lineTo(line[l][1][0], line[l][1][1]);
 		fc.stroke();
 	}
+	
+	for(var z = 0; z < zone.length; z++){
+		fc.beginPath();
+		fc.moveTo(zone[z][0][0], zone[z][0][1]);
+		for( var zp = 1; zp < zone[z].length; zp++){
+			fc.lineTo(zone[z][zp][0], zone[z][zp][1]);
+		}
+		fc.lineTo(zone[z][0][0], zone[z][0][1]);
+		fc.closePath();
+		fc.fill();
+	}
 }
 
 function flatten(){//flattens all the three layers and renders them on bc and hides the other two layers
@@ -362,15 +374,31 @@ function tesellate(){
 }
 //tesellate();
 
+// $('.canvas').mousemove(function(e){//logs the coordinates of the mouse in the console in real time
+	// var mousePos = new Array();
+	// mousePos[0] = e.pageX - this.offsetLeft;
+	// mousePos[1] = e.pageY - this.offsetTop;
+	
+	// var scaleFactor = baseCanvas.height/$('.canvas').height();
+	
+	// mousePos = vPrd(mousePos, scaleFactor);
+	// console.clear();
+	// console.log(mousePos);
+// });
+
 var city = new Array();
 
-city['hyderabad'] = {lineParams:[[[0,100], [1000,900], 'nh9','black'],[[0,666], [1000,500], 'musi','cyan']],
+var iitZone = new Array([718,285],[614,395],[566,560],[844,560],[844,370]);
+
+city['hyderabad'] = {lineParams:[[[0,100], [1000,900], 'nh9','black',1],[[0,666], [1000,500], 'musi','cyan',1]],
 						mapSrc: 'hyderabadCompare.jpg'};
-city['kota'] = {lineParams:[[[0,500], [300,000], 'chambal','cyan'],[[250,0], [500,1000], 'nh12','black']],
+city['kota'] = {lineParams:[[[0,500], [300,000], 'chambal','cyan',1],[[250,0], [500,1000], 'nh12','black',1]],
 				mapSrc: 'kotaCompare.jpg'};
-city['roorkee'] = {lineParams:[[[300,1000], [600,0], 'CanalRoad','black'],[[430,1000], [730,0], 'NH','black'],
-								[[250,0], [660,250], 'nh9','black'],
-								[[250,0], [400,700], 'nh9','black']],
+city['roorkee'] = {lineParams:[[[300,1000], [600,0], 'CanalRoad','black',1],[[430,1000], [730,0], 'NH','black',1],
+								[[250,0], [660,250], 'nh9','black',1],
+								[[250,0], [400,700], 'nh9','black',1],
+								[[500,0], [1000,115], 'river','cyan',-1]],
+					zone: new Array(iitZone),
 					mapSrc: 'roorkeeCompare.jpg'};
 
 function loadCity(){
@@ -380,6 +408,7 @@ function loadCity(){
 	
 	if(curCity != 'random'){
 		line = city[curCity].lineParams;
+		zone = city[curCity].zone;
 		
 		curMap = document.getElementById(curCity+'Map');
 		mc.drawImage(curMap,0,0,baseCanvas.width,baseCanvas.height);
