@@ -391,9 +391,11 @@ var city = new Array();
 var iitZone = new Array([718,285],[614,395],[566,560],[844,560],[844,370]);
 
 city['hyderabad'] = {lineParams:[[[0,100], [1000,900], 'nh9','black',1],[[0,666], [1000,500], 'musi','cyan',1]],
-						mapSrc: 'hyderabadCompare.jpg'};
+						mapSrc: 'hyderabadCompare.jpg',
+						zone:new Array()};
 city['kota'] = {lineParams:[[[0,500], [300,000], 'chambal','cyan',1],[[250,0], [500,1000], 'nh12','black',1]],
-				mapSrc: 'kotaCompare.jpg'};
+				mapSrc: 'kotaCompare.jpg',
+				zone:new Array()};
 city['roorkee'] = {lineParams:[[[300,1000], [600,0], 'CanalRoad','black',1],[[430,1000], [730,0], 'NH','black',1],
 								[[250,0], [660,250], 'nh9','black',1],
 								[[250,0], [400,700], 'nh9','black',1],
