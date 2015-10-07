@@ -16,6 +16,12 @@ fc.fillStyle = 'rgba(40,40,40,0.7)';
 fc.strokeStyle = 'black';
 fc.lineWidth = 3;
 
+var zoneCanvas = document.getElementById('zoneCanvas');
+var zc = zoneCanvas.getContext('2d');
+zc.fillStyle = 'rgba(40,40,40,0.7)';
+zc.strokeStyle = 'black';
+zc.lineWidth = 3;
+
 var curCity = 'hyderabad';//current city
 var line = new Array();//all the lines
 var zone = new Array();//all the zonesa in the city
@@ -181,7 +187,7 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 	c[7] = vSum(vPrd(unitV(vDiff(E34,cen)),sqN),cen);
 	c[8] = vSum(vPrd(unitV(vDiff(E3,cen)),sqN*Math.sqrt(2)),cen);
 	
-	var theNum;
+	var nums = new Array();
 	if(sq[3]){//checking if it is a residential region
 		var minParam = 0;//intercept Sum
 		var minParam2 = 2*baseCanvas.width;//just an impossible large value to start with
@@ -191,12 +197,12 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 			if(minParam < param1){
 				minParam = param1;
 				minParam2 = param2;
-				theNum = cn;
+				nums.push(cn);
 			}else if(minParam == param1){
 				if(param2 < minParam2){
 					minParam2 = param2;
 					minParam = param1;
-					theNum = cn;
+					nums.push(cn);
 				}
 			}
 		}
@@ -209,17 +215,20 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 			if(param1 > minParam){
 				minParam = param1;
 				minParam2 = param2;
-				theNum = cn;
+				nums.push(cn);
 			}else if(param1 == minParam){
 				if(maxParam < param2){
 					maxParam = param2;
 					minParam = param1;
-					theNum = cn;
+					nums.push(cn);
 				}
 			}
 		}
-		//console.log(maxParam,theNum);
+		//console.log(maxParam,nums);
 	}
+	var theNum;
+	theNum = nums.pop();
+	
 	for(var n = 0; n < 9; n++){
 		var isResi = sq[3];
 		if(n == theNum){
@@ -227,6 +236,14 @@ function trans(sq){//sq contains [center-x, center-y, square size, isResidence]
 		}
 		sqStack.push([c[n][0], c[n][1], sqN, isResi]);
 	}
+}
+
+function isNotInZone(pos){
+	pos[0] = Math.floor(pos[0]);
+	pos[1] = Math.floor(pos[1]);
+	var imgData = zc.getImageData(pos[0],pos[1],1,1);
+	//console.log(imgData.data[3]);
+	if(imgData.data[3] != 0){return false;}else{return true;}
 }
 
 function isPassing(ln,sq){//returns true if line ln passes through the square sq
@@ -317,8 +334,9 @@ function maxDist(pos){
 }
 
 function renderCanvas(){
-	bc.clearRect(0,0,1000,1000);
-	fc.clearRect(0,0,1000,1000);
+	bc.clearRect(0,0,baseCanvas.width,baseCanvas.height);
+	fc.clearRect(0,0,finalCanvas.width,finalCanvas.height);
+	zc.clearRect(0,0,zoneCanvas.width,zoneCanvas.height);
 	
 	for(var s = 0; s < sqStack.length; s++){//console.log(sqStack[s]);
 		if(sqStack[s][3]){
@@ -341,14 +359,14 @@ function renderCanvas(){
 	}
 	
 	for(var z = 0; z < zone.length; z++){
-		fc.beginPath();
-		fc.moveTo(zone[z][0][0], zone[z][0][1]);
+		zc.beginPath();
+		zc.moveTo(zone[z][0][0], zone[z][0][1]);
 		for( var zp = 1; zp < zone[z].length; zp++){
-			fc.lineTo(zone[z][zp][0], zone[z][zp][1]);
+			zc.lineTo(zone[z][zp][0], zone[z][zp][1]);
 		}
-		fc.lineTo(zone[z][0][0], zone[z][0][1]);
-		fc.closePath();
-		fc.fill();
+		zc.lineTo(zone[z][0][0], zone[z][0][1]);
+		zc.closePath();
+		zc.fill();
 	}
 }
 
@@ -383,7 +401,7 @@ function tesellate(){
 	
 	// mousePos = vPrd(mousePos, scaleFactor);
 	// console.clear();
-	// console.log(mousePos);
+	// console.log(mousePos,isNotInZone(mousePos));
 // });
 
 var city = new Array();
