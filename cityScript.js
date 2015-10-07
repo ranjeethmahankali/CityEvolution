@@ -368,6 +368,10 @@ city['hyderabad'] = {lineParams:[[[0,100], [1000,900], 'nh9','black'],[[0,666], 
 						mapSrc: 'hyderabadCompare.jpg'};
 city['kota'] = {lineParams:[[[0,500], [300,000], 'chambal','cyan'],[[250,0], [500,1000], 'nh12','black']],
 				mapSrc: 'kotaCompare.jpg'};
+city['roorkee'] = {lineParams:[[[300,1000], [600,0], 'CanalRoad','black'],[[430,1000], [730,0], 'NH','black'],
+								[[250,0], [660,250], 'nh9','black'],
+								[[250,0], [400,700], 'nh9','black']],
+					mapSrc: 'roorkeeCompare.jpg'};
 
 function loadCity(){
 	$('#finalCanvas').show();
